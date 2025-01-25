@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  pytheas-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7437:7437"
+    environment:
+      - PYTHEAS_API_KEY=${PYTHEAS_API_KEY}
+      - SOLANA_RPC_ENDPOINT=${SOLANA_RPC_ENDPOINT}
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://pytheas:${DB_PASSWORD}@db:5432/pytheas
+    volumes:
+      - ./pytheas_core:/app/pytheas_core
+      - ./models:/app/models
+    depends_on:
+      - redis
+      - db
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=pytheas
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=pytheas
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  pytheas-ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    ports:
+      - "3437:3437"
+    environment:
+      - PYTHEAS_API_URL=http://pytheas-api:7437
+    depends_on:
+      - pytheas-api
+
+volumes:
+  redis_data:
+  postgres_data:

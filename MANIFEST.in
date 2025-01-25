@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include requirements.txt
+recursive-include assets *
+recursive-include pytheas_core *.json *.yaml *.yml
+recursive-include agixt *
+recursive-include tests *
+recursive-include streamlit *
+recursive-include docs *
